@@ -3,13 +3,9 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --vermelho: #FB3903;
+  --vermelho-claro: #f7968f;
+  --azul: #1D31E8;
 }
 
 @media (prefers-color-scheme: dark) {
