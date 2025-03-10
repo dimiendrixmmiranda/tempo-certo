@@ -3,11 +3,15 @@ import { definirDescricaoDoTempo } from "@/utils/descricaoDoTempo";
 import { obterDiaDaSemana } from "@/utils/diaDaSemana";
 import definirDirecaoDoTempo from "@/utils/direcaoDoVento";
 import extrairHora from "@/utils/extrairHora";
+import { listaDeRedesSociais } from "@/utils/listaDeRedesSociais";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { BsWind } from "react-icons/bs";
 import { FaCloudRain, FaRegCompass } from "react-icons/fa";
 import { FaTemperatureArrowDown, FaTemperatureArrowUp } from "react-icons/fa6";
+import { FiSunrise } from "react-icons/fi";
 import { GiRaining } from "react-icons/gi";
+import { LuSunset } from "react-icons/lu";
 
 interface Tempo {
 	current_weather: {
@@ -23,6 +27,8 @@ interface Tempo {
 		temperature_2m_max: number[]
 		temperature_2m_min: number[]
 		time: string[]
+		sunrise: string[]
+		sunset: string[]
 	},
 	hourly: {
 		temperature_2m: number[]
@@ -37,7 +43,9 @@ export default function Home() {
 	const [cidade, setCidade] = useState('São Paulo');
 	const [elementoCidade, setElementoCidade] = useState('São Paulo');
 	const [, setErro] = useState('');
+	const [imagem, setImagem] = useState<string | null>(null)
 
+	console.log(tempo)
 	useEffect(() => {
 		async function fetchWeather() {
 			try {
@@ -50,6 +58,12 @@ export default function Home() {
 		}
 		fetchWeather()
 	}, [localizacao])
+
+	useEffect(() => {
+		if (tempo?.current_weather.weathercode !== undefined) {
+			setImagem(definirDescricaoDoTempo(tempo.current_weather.weathercode).imagem);
+		}
+	}, [tempo])
 
 	const handlePesquisa = async () => {
 		try {
@@ -112,7 +126,7 @@ export default function Home() {
 						2: 'Informações de localização indisponíveis.',
 						3: 'Tempo limite para obter a localização expirado.',
 					};
-					setErro(mensagensErro[error.code] || 'Erro desconhecido ao obter a localização.');					
+					setErro(mensagensErro[error.code] || 'Erro desconhecido ao obter a localização.');
 				},
 				{ enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
 			);
@@ -122,64 +136,69 @@ export default function Home() {
 	};
 
 
-
 	return (
-		<div className="w-screen min-h-screen overflow-hidden bg-zinc-200 text-black">
+		<div className="w-screen min-h-screen overflow-hidden bg-zinc-200 text-black"
+			style={{
+				backgroundImage: `url(${imagem})`,
+				backgroundSize: 'cover',
+				backgroundPosition: 'center',
+				backgroundRepeat: 'no-repeat'
+			}}>
 			<div className="p-4">
 				{/* input de busca */}
 				<div className="w-full text-white overflow-hidden gap-x-2 gap-y-1" style={{ display: 'grid', gridTemplateColumns: '1fr 120px' }}>
 					<input
 						type="text"
-						className="h-[30px] px-2 py-1 rounded-md uppercase font-bold w-full"
+						className="h-[30px] px-2 py-1 rounded-md uppercase font-bold w-full border-2 border-blue-900 text-sm"
 						placeholder="Digite o nome da cidade"
 						value={cidade}
 						onChange={(e) => setCidade(e.target.value)}
-						style={{ backgroundColor: 'var(--vermelho-claro)' }}
+						style={{ backgroundColor: 'var(--azul-claro)' }}
 					/>
-					<button onClick={handlePesquisa} className="uppercase font-black" style={{ backgroundColor: 'var(--vermelho)' }}>Buscar</button>
-					<button onClick={getLocation} className="col-start-1 col-end-3 uppercase font-bold text-lg py-1" style={{ backgroundColor: 'var(--vermelho)' }}>pegar localização atual</button>
+					<button onClick={handlePesquisa} className="uppercase font-black rounded-lg" style={{ backgroundColor: 'var(--azul)' }}>Buscar</button>
+					<button onClick={getLocation} className="col-start-1 col-end-3 uppercase font-bold text-lg py-1 rounded-lg" style={{ backgroundColor: 'var(--azul)' }}>pegar localização atual</button>
 				</div>
 
 				{/* Dados da previsão */}
 				{
 					tempo != null ? (
 						<div className="mt-6">
-							<h2 className="uppercase font-black text-4xl text-center">{elementoCidade}</h2>
+							<h2 className="uppercase font-black text-4xl text-center text-white mb-8" style={{ textShadow: '2px 2px 3px black' }}>{elementoCidade}</h2>
 							<div className="flex flex-col gap-6">
 								{/* Temperatura Atual e descrição do tempo */}
-								<div className="flex flex-col">
+								<div className="flex flex-col text-white" style={{ textShadow: '2px 2px 3px black' }}>
 									<p className="uppercase font-black text-6xl text-center">{tempo.current_weather.temperature}ºC</p>
 									<p className="uppercase font-semibold text-2xl text-center">{definirDescricaoDoTempo(tempo.current_weather.weathercode).texto}</p>
 								</div>
 
 								{/* Temperatura Máxima e Mínima do dia */}
-								<div className="grid grid-cols-2 gap-2">
-									<div className="w-32 h-16 bg-amber-400 justify-self-center" style={{ display: 'grid', gridTemplateColumns: '45px 1fr' }}>
+								<div className="grid grid-cols-2 gap-2 text-white" style={{ textShadow: '2px 2px 3px black' }}>
+									<div className="w-32 h-16 justify-self-center" style={{ display: 'grid', gridTemplateColumns: '45px 1fr' }}>
 										<div className="text-4xl flex justify-center items-center">
-											<FaTemperatureArrowUp />
+											<FaTemperatureArrowUp className="text-red-600" />
 										</div>
 										<p className="text-center self-center text-3xl font-bold">{tempo.daily.temperature_2m_max[0].toFixed(0)}ºC</p>
 									</div>
-									<div className="w-32 h-16 bg-amber-400 justify-self-center" style={{ display: 'grid', gridTemplateColumns: '45px 1fr' }}>
+									<div className="w-32 h-16 justify-self-center" style={{ display: 'grid', gridTemplateColumns: '45px 1fr' }}>
 										<div className="text-4xl flex justify-center items-center">
-											<FaTemperatureArrowDown />
+											<FaTemperatureArrowDown className="text-blue-700" />
 										</div>
 										<p className="text-center self-center text-3xl font-bold">{tempo.daily.temperature_2m_min[0].toFixed(0)}ºC</p>
 									</div>
 								</div>
 
 								{/* Outros dados do dia */}
-								<div className="grid grid-cols-4 gap-2">
+								<div className="grid grid-cols-2 gap-2">
 									<div className="flex justify-center items-center">
-										<div className="w-20 h-24 bg-amber-400" style={{ display: 'grid', gridTemplateRows: '1fr 40px' }}>
-											<div className="text-4xl flex justify-center items-center">
+										<div className="w-full max-w-[120px] mx-auto p-2 h-24 text-white py-2 rounded-lg" style={{ display: 'grid', gridTemplateRows: '1fr 40px', backgroundColor: 'var(--azul)' }}>
+											<div className="text-5xl flex justify-center items-center">
 												<BsWind />
 											</div>
 											<p className="text-center self-center">{tempo.current_weather.windspeed}Km/h</p>
 										</div>
 									</div>
 									<div className="flex justify-center items-center">
-										<div className="w-20 h-24 bg-amber-400" style={{ display: 'grid', gridTemplateRows: '1fr 40px' }}>
+										<div className="w-full max-w-[120px] mx-auto p-2 h-24 text-white py-2 rounded-lg" style={{ display: 'grid', gridTemplateRows: '1fr 40px', backgroundColor: 'var(--azul)' }}>
 											<div className="text-5xl flex justify-center items-center">
 												<FaRegCompass />
 											</div>
@@ -187,7 +206,7 @@ export default function Home() {
 										</div>
 									</div>
 									<div className="flex justify-center items-center">
-										<div className="w-20 h-24 bg-amber-400" style={{ display: 'grid', gridTemplateRows: '1fr 40px' }}>
+										<div className="w-full max-w-[120px] mx-auto p-2 h-24 text-white py-2 rounded-lg" style={{ display: 'grid', gridTemplateRows: '1fr 40px', backgroundColor: 'var(--azul)' }}>
 											<div className="text-5xl flex justify-center items-center">
 												<FaCloudRain />
 											</div>
@@ -195,26 +214,42 @@ export default function Home() {
 										</div>
 									</div>
 									<div className="flex justify-center items-center">
-										<div className="w-20 h-24 bg-amber-400" style={{ display: 'grid', gridTemplateRows: '1fr 40px' }}>
+										<div className="w-full max-w-[120px] mx-auto p-2 h-24 text-white py-2 rounded-lg" style={{ display: 'grid', gridTemplateRows: '1fr 40px', backgroundColor: 'var(--azul)' }}>
 											<div className="text-5xl flex justify-center items-center">
 												<GiRaining />
 											</div>
 											<p className="text-center leading-4 self-center">{tempo.daily.precipitation_sum[0]}mm</p>
 										</div>
 									</div>
+									<div className="flex justify-center items-center">
+										<div className="w-full max-w-[120px] mx-auto p-2 h-24 text-white py-2 rounded-lg bg-orange-500" style={{ display: 'grid', gridTemplateRows: '1fr 40px'}}>
+											<div className="text-5xl flex justify-center items-center">
+												<FiSunrise />
+											</div>
+											<p className="text-center leading-4 self-center text-xl font-black">{extrairHora(tempo.daily.sunrise[0])}</p>
+										</div>
+									</div>
+									<div className="flex justify-center items-center">
+										<div className="w-full max-w-[120px] mx-auto p-2 h-24 text-white py-2 rounded-lg bg-zinc-950" style={{ display: 'grid', gridTemplateRows: '1fr 40px'}}>
+											<div className="text-5xl flex justify-center items-center">
+												<LuSunset />
+											</div>
+											<p className="text-center leading-4 self-center text-xl font-black">{extrairHora(tempo.daily.sunset[0])}</p>
+										</div>
+									</div>
 								</div>
 
 								{/* Tempo de hora em hora */}
-								<div className="w-full bg-red-500 p-4 flex flex-col gap-4">
+								<div className="w-full p-4 flex flex-col gap-4 text-white" style={{ backgroundColor: 'var(--azul)' }}>
 									<h2 className="uppercase font-black text-center text-2xl leading-6">Tempo de hora em hora:</h2>
 									<div className="overflow-x-auto pb-2">
 										<ul className="flex space-x-4">
 											{tempo.hourly.temperature_2m.slice(0, 24).map((temperatura, i) => {
 												const listaDeHoras = tempo.hourly.time.slice(0, 24).map(hora => extrairHora(`${hora}`))
 												return (
-													<li key={i} className="p-2 bg-gray-200 rounded flex flex-col justify-center items-center">
-														<p className="font-bold text-xl">
-															{temperatura}°C
+													<li key={i} className=" bg-gray-200 rounded flex flex-col justify-center items-center px-4 h-20 text-black" >
+														<p className="font-black text-2xl">
+															{temperatura.toFixed(0)}°C
 														</p>
 														<p className="font-semibold">
 															{listaDeHoras[i]}
@@ -227,7 +262,7 @@ export default function Home() {
 								</div>
 
 								{/* Previsão para os próximos dias */}
-								<div className="w-full bg-red-500 p-4 flex flex-col gap-4">
+								<div className="w-full p-4 flex flex-col gap-4 text-white" style={{ backgroundColor: 'var(--azul)' }}>
 									<h2 className="uppercase font-black text-center text-2xl leading-6">Previsão do tempo para os próximos dias:</h2>
 									<div className="overflow-x-auto pb-2">
 										<ul className="flex gap-4">
@@ -238,27 +273,34 @@ export default function Home() {
 													const probabilidadeDeChuva = tempo.daily.precipitation_probability_mean
 													const quantidadeDeChuva = tempo.daily.precipitation_sum
 													return (
-														<li key={i} className="border-2 border-black rounded-lg">
-															<div className="flex flex-col w-[110px]">
-																<div className="gap-1 text-lg uppercase font-semibold  w-20 mx-auto" style={{ display: 'grid', gridTemplateColumns: '22px 1fr' }}>
+														<li key={i} className="border-2 border-black text-black rounded-lg bg-zinc-200 flex flex-col gap-1">
+															<div className="flex flex-col w-32">
+																<div className="w-full flex justify-center items-center text-3xl font-black">
+																	<p>{((tempMax[i] + tempMin[i]) / 2).toFixed(0)}ºC</p>
+																</div>
+															</div>
+															<div className="grid grid-cols-2">
+																<div className="text-lg uppercase font-semibold mx-auto flex flex-col">
 																	<div className="self-center justify-self-center">
 																		<FaTemperatureArrowUp />
 																	</div>
-																	<p className="self-center justify-self-center">{tempMax[i]}ºC</p>
+																	<p className="self-center justify-self-center text-[.8em]">{tempMax[i]}ºC</p>
 																</div>
-																<div className="gap-1 text-lg uppercase font-semibold  w-20 mx-auto" style={{ display: 'grid', gridTemplateColumns: '22px 1fr' }}>
+																<div className="text-lg uppercase font-semibold mx-auto flex flex-col">
 																	<div className="self-center justify-self-center">
 																		<FaTemperatureArrowDown />
 																	</div>
-																	<p className="self-center justify-self-center">{tempMin[i]}ºC</p>
+																	<p className="self-center justify-self-center text-[.8em]">{tempMin[i]}ºC</p>
 																</div>
 															</div>
-															<div className="gap-1" style={{ display: 'grid', gridTemplateColumns: '40px 1fr' }}>
-																<div className="justify-self-center">
-																	<p>{probabilidadeDeChuva[i]}%</p>
+															<div className="gap-1 grid grid-cols-2">
+																<div className="justify-self-center flex justify-center items-center flex-col">
+																	<FaCloudRain className="text-2xl" />
+																	<p className="text-[.8em]">{probabilidadeDeChuva[i]}%</p>
 																</div>
-																<div className="justify-self-center">
-																	<p>{quantidadeDeChuva[i]}mm</p>
+																<div className="justify-self-center flex justify-center items-center flex-col">
+																	<GiRaining className="text-2xl" />
+																	<p className="text-[.8em]">{quantidadeDeChuva[i]}mm</p>
 																</div>
 															</div>
 															<p className="whitespace-nowrap font-bold text-lg text-center capitalize">{obterDiaDaSemana(t)}</p>
@@ -277,7 +319,22 @@ export default function Home() {
 				}
 			</div>
 			<footer className="p-2 bg-black text-white">
-				<p>Produzido por Dimi Endrix Martins Miranda</p>
+				<div className="flex flex-col px-2 py-1 bg-black text-white md:flex-row">
+					<div className="flex justify-center items-center w-full">
+						<p className="w-full font-bold uppercase text-center md:text-start">Produzido por dimi endrix martins miranda</p>
+					</div>
+					<ul className="grid grid-cols-4 mt-4 mb-2 max-w-[500px] mx-auto w-full xl:m-0 xl:max-w-[300px] xl:ml-auto">
+						{
+							listaDeRedesSociais.map((rede, i) => {
+								return (
+									<li key={i} className="flex justify-center items-center text-3xl transition-all hover:scale-[1.1]">
+										<Link href={rede.link}>{rede.icone}</Link>
+									</li>
+								)
+							})
+						}
+					</ul>
+				</div>
 			</footer>
 		</div>
 	);

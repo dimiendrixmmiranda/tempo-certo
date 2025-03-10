@@ -5,7 +5,8 @@
   --foreground: #171717;
   --vermelho: #FB3903;
   --vermelho-claro: #f7968f;
-  --azul: #1D31E8;
+  --azul: #0c0855;
+  --azul-claro: #8480d3;
 }
 
 @media (prefers-color-scheme: dark) {
