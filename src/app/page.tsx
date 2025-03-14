@@ -45,7 +45,6 @@ export default function Home() {
 	const [, setErro] = useState('');
 	const [imagem, setImagem] = useState<string | null>(null)
 
-	console.log(tempo)
 	useEffect(() => {
 		async function fetchWeather() {
 			try {
@@ -102,17 +101,13 @@ export default function Home() {
 		}
 	};
 
-
-	// Função para capturar a localização do usuário
-	const arredondarCoordenadas = (valor: number) => parseFloat(valor.toFixed(2));
-
 	const getLocation = (event: React.MouseEvent<HTMLButtonElement>) => {
 		event.preventDefault();
 		if ("geolocation" in navigator) {
 			navigator.geolocation.getCurrentPosition(
 				async (position) => {
-					const lat = arredondarCoordenadas(position.coords.latitude);
-					const lon = arredondarCoordenadas(position.coords.longitude);
+					const lat = position.coords.latitude
+					const lon = position.coords.longitude
 
 					const cidadeObtida = await obterCidadePorCoordenadas(lat, lon);
 					console.log(cidadeObtida)
